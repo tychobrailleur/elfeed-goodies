@@ -58,6 +58,18 @@
 (defun elfeed-entry-buffer ()
   (get-buffer-create "*elfeed-entry*"))
 
+
+(defun elfeed-goodies/suppress-extra-jump (_entry)
+  "Replace `elfeed-search-show-entry' with extra line forward."
+  (interactive (list (elfeed-search-selected :ignore-region)))
+  (require 'elfeed-show)
+  (when (elfeed-entry-p entry)
+    (elfeed-untag entry 'unread)
+    (elfeed-search-update-entry entry)
+    (elfeed-show-entry entry)))
+
+(add-function :override (symbol-function 'elfeed-search-show-entry) #'elfeed-goodies/suppress-extra-jump)
+
 (defun elfeed-goodies/split-show-next ()
   "Show the next item in the elfeed-search buffer."
   (interactive)

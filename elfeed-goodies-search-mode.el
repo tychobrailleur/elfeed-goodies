@@ -31,6 +31,12 @@
   :group 'elfeed-goodies
   :type 'float)
 
+(defcustom elfeed-goodies/date-format "%d-%m-%Y"
+  "Date format of the entry."
+  :group 'elfeed-goodies
+  :type 'string)
+
+
 (defun -pad-string-to (str width)
   "Pad `STR' to `WIDTH' characters."
   (format (format "%s%%%ds" str width) ""))
@@ -86,7 +92,9 @@ and the length of the active queue."
                (funcall separator-left 'powerline-active1 'powerline-active2)
                (powerline-raw (-pad-string-to "Tags" (- elfeed-goodies/tag-column-width 6)) 'powerline-active2 'l)
                (funcall separator-left 'powerline-active2 'mode-line)
-               (powerline-raw "Subject" 'mode-line 'l)))
+               (powerline-raw "Subject" 'mode-line 'l)
+               (funcall separator-left 'powerline-active2 'mode-line)
+               (powerline-raw "Date" 'mode-line 'l)))
          (rhs (search-header/rhs separator-left separator-right search-filter stats update)))
 
     (concat (powerline-render lhs)
@@ -124,11 +132,17 @@ and the length of the active queue."
           (search-header/draw-wide separator-left separator-right search-filter stats db-time)
         (search-header/draw-tight separator-left separator-right search-filter stats db-time)))))
 
+(defun elfeed-goodies/feed-entry-date->string (feed-entry-date)
+  "Convert a FEED-ENTRY-DATE to a string using `elfeed-goodies/date-format'."
+  (format-time-string elfeed-goodies/date-format
+                      (seconds-to-time feed-entry-date)))
+
 (defun elfeed-goodies/entry-line-draw (entry)
   "Print ENTRY to the buffer."
 
   (let* ((title (or (elfeed-meta entry :title) (elfeed-entry-title entry) ""))
          (title-faces (elfeed-search--faces (elfeed-entry-tags entry)))
+         (date-entry (elfeed-goodies/feed-entry-date->string (elfeed-entry-date entry)))
          (feed (elfeed-entry-feed entry))
          (feed-title
           (when feed
@@ -158,7 +172,8 @@ and the length of the active queue."
         (progn
           (insert (propertize feed-column 'face 'elfeed-search-feed-face) " ")
           (insert (propertize tag-column 'face 'elfeed-search-tag-face) " ")
-          (insert (propertize title 'face title-faces 'kbd-help title)))
+          (insert (propertize title 'face title-faces 'kbd-help title) " ")
+          (insert (propertize date-entry 'face 'elfeed-search-feed-face)))
       (insert (propertize title 'face title-faces 'kbd-help title)))))
 
 (provide 'elfeed-goodies-search-mode)
