@@ -59,7 +59,7 @@
   (get-buffer-create "*elfeed-entry*"))
 
 
-(defun elfeed-goodies/suppress-extra-jump (_entry)
+(defun elfeed-goodies/suppress-extra-jump (entry)
   "Replace `elfeed-search-show-entry' with extra line forward."
   (interactive (list (elfeed-search-selected :ignore-region)))
   (require 'elfeed-show)
